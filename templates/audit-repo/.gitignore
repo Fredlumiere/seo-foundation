@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.unlighthouse/
+.DS_Store
+pdf-build/payload.js
+pdf-build/ci-result.json
+pdf-build/shots/
+pdf-build/*.pdf

@@ -1,0 +1,38 @@
+Subject: {project} — SEO foundation in place, here's what's next
+
+Hi {name},
+
+Quick update on the website work. The foundation is now in place:
+
+WHAT'S DONE
+  • Google Analytics 4 is live and collecting visitor data on every page.
+    Realtime view: https://analytics.google.com/
+  • Google Search Console is verified and the sitemap is submitted ({page_count} pages).
+    Dashboard: https://search.google.com/search-console
+  • {your_email} has access to both. Add others in GA4 → Admin → Account Access
+    Management, and Search Console → Settings → Users and Permissions.
+  • An automated weekly Lighthouse audit runs every Monday at 10:00 UTC.
+    Public dashboard: https://{project}-audit-reports.pages.dev/
+    No login required — bookmark it.
+
+WHAT NEEDS ATTENTION
+  • {finding_1}
+  • {finding_2}
+  • {finding_3}
+  • {finding_4}
+  Public test (no login): https://pagespeed.web.dev/report?url={site}
+
+THE FIX LIST
+Attached: {Project}-Fix-List.pdf — 10 specific things to improve, in priority
+order, with step-by-step instructions for each. Most can be done in {hours_estimate}
+hours total. Items that may need {cms_vendor} support: {flagged_items}.
+
+WHAT COMES NEXT
+Once the foundation fixes are in place, the next phase is keyword optimization
+— ensuring the pages people are actually searching for show up in Google. We'll
+look at search query data in Search Console (gives Google 2-6 weeks to populate)
+and tune the highest-traffic pages.
+
+Let me know if you want to walk through the PDF live.
+
+— {sender}

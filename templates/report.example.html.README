@@ -1,0 +1,22 @@
+report.example.html is an example PDF fix list (originally produced for tmpc.org)
+kept here as a design reference, NOT a template.
+
+When building a new project's report:
+
+1. Copy report.example.html into your audit repo's pdf-build/ as report.html
+2. Replace ALL project-specific content (URLs, fix descriptions, screenshots, palette,
+   typography choices) with content sourced from findings.json
+3. Keep the page-break CSS rules intact — those are battle-tested and documented in
+   SETUP.md Phase 3.4
+
+The reusable parts:
+  - CSS for page breaks, priority pills, callout boxes
+  - 14-page structure: cover / overview / TOC / 10 fix pages / closing
+  - Typography pairing (Fraunces + Inter, switchable)
+  - Print-ready dimensions (8.5x11in with proper margins)
+
+The non-reusable parts (replace per project):
+  - Brand palette (CSS custom properties at top of <style>)
+  - All page content
+  - All URLs
+  - Screenshots

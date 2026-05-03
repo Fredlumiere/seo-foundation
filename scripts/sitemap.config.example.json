@@ -1,0 +1,21 @@
+{
+  "_comment": "Copy this file to your project root as sitemap.config.json and edit per project. See generate_sitemap.py docstring for the full schema.",
+  "base_url": "https://example.com",
+  "root": ".",
+  "output": "sitemap.xml",
+  "locales": [],
+  "exclude_dirs": ["backup", "drafts"],
+  "exclude_files": ["temp.html", "test.html"],
+  "exclude_patterns": ["^draft-.*\\.html$"],
+  "priority_overrides": {
+    "index.html": 1.0,
+    "about.html": 0.8,
+    "pricing.html": 0.9
+  },
+  "default_priority": 0.6,
+  "default_changefreq": "monthly",
+  "changefreq_overrides": {
+    "index.html": "weekly",
+    "blog/index.html": "weekly"
+  }
+}

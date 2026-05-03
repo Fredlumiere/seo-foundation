@@ -1,0 +1,12 @@
+{
+  "name": "{project}-audit",
+  "version": "1.0.0",
+  "description": "Scheduled Lighthouse audit of {site} published via Cloudflare Pages",
+  "private": true,
+  "scripts": {
+    "audit": "unlighthouse-ci --site {site} --build-static --output-path ./dist"
+  },
+  "devDependencies": {
+    "@unlighthouse/cli": "^0.17.0"
+  }
+}

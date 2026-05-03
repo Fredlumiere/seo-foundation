@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+"""STARTER — adapt heavily per project. Do NOT run as-is on a different repo.
+
+This script's job is to inject SEO + GEO foundation into every English HTML page:
+  1. Consent Mode v2 gtag bootstrap (loaded before any cookie banner script)
+  2. <link rel="canonical"> on every indexable page
+  3. JSON-LD schema (Organization, WebSite, Product, BreadcrumbList, etc.)
+  4. og:url meta tags
+  5. hreflang dedup (if the project has localized pages)
+
+The injection logic is generic. The CONFIGURATION at the top of this file is
+project-specific. Every project will need to:
+
+  - Set BASE_URL
+  - Define which page-path patterns get which JSON-LD schemas
+  - Provide page-specific descriptions, dates, headlines for E-E-A-T schemas
+  - Decide which cookie/consent script to anchor the gtag tag against
+
+Reference implementation lives in apiant-website/scripts/inject_seo.py (799 lines).
+That version has apiant-specific hub descriptions, E-E-A-T page lists, schema
+rules per URL pattern. Use it as a working example, NOT as a generic template.
+
+Recommended workflow for a new project:
+
+  1. Copy this starter into your project's scripts/ directory
+  2. Read apiant-website/scripts/inject_seo.py to see how the apiant version
+     handles its specific page taxonomy
+  3. Replace the CONFIG block below with your project's data
+  4. Replace the schema-injection rules (find_schema_for_page) with rules
+     that match your project's URL patterns
+  5. Run repeatedly during development — the script is designed to be idempotent
+
+A future iteration of seo-foundation will likely move the project-specific
+data out of the script and into a sibling .json/.yaml config. For now: copy,
+adapt, commit to your own repo.
+"""
+from __future__ import annotations
+import json
+import re
+import sys
+from pathlib import Path
+
+# ============================================================
+# CONFIG — replace per project
+# ============================================================
+
+ROOT = Path(__file__).resolve().parent.parent
+BASE_URL = "https://CHANGE-ME.example.com"
+
+# Which existing <script> tag should the gtag bootstrap be inserted before?
+# Match the cookie/consent script your site already loads, so gtag fires first.
+COOKIE_TAG_PATTERN = r'<script[^>]+src=["\'][/]?js/cookie-consent\.js["\'][^>]*>\s*</script>'
+
+# The gtag bootstrap script tag to inject
+CONSENT_TAG = '<script src="/js/gtag-consent.js"></script>'
+
+# Organization schema for the homepage (replace with your project's data)
+ORGANIZATION_SCHEMA: dict = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "CHANGE ME",
+    "url": BASE_URL,
+    "logo": f"{BASE_URL}/logo.png",
+    "sameAs": [
+        # "https://www.linkedin.com/company/...",
+        # "https://twitter.com/...",
+        # "https://github.com/...",
+    ],
+}
+
+# WebSite schema for the homepage
+WEBSITE_SCHEMA: dict = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "CHANGE ME",
+    "url": BASE_URL,
+}
+
+# Pages that get noindex (skip canonical / schema injection on these)
+NOINDEX_PAGES: set[str] = {
+    "404.html",
+    "401.html",
+    "temp.html",
+}
+
+# ============================================================
+# Generic injection logic — usually reusable as-is
+# ============================================================
+
+CANONICAL_RE = re.compile(r'<link[^>]+rel=["\']canonical["\'][^>]*/?>', re.I)
+NOINDEX_META_RE = re.compile(
+    r'<meta\b[^>]*name\s*=\s*["\']robots["\'][^>]*content\s*=\s*["\'][^"\']*noindex',
+    re.I,
+)
+HEAD_CLOSE_RE = re.compile(r'</head>', re.I)
+SCHEMA_MARKER = '<!-- seo-foundation:schema -->'
+OGURL_MARKER = '<!-- seo-foundation:ogurl -->'
+
+
+def page_has_noindex(content: str) -> bool:
+    return bool(NOINDEX_META_RE.search(content))
+
+
+def url_for_page(page_path: Path) -> str:
+    rel = page_path.relative_to(ROOT).as_posix()
+    if rel.endswith("/index.html"):
+        rel = rel[: -len("index.html")]
+    elif rel == "index.html":
+        rel = ""
+    return f"{BASE_URL}/{rel}" if rel else f"{BASE_URL}/"
+
+
+def ensure_canonical(content: str, url: str) -> str:
+    if CANONICAL_RE.search(content):
+        return content
+    tag = f'<link rel="canonical" href="{url}"/>'
+    return HEAD_CLOSE_RE.sub(f"  {tag}\n</head>", content, count=1)
+
+
+def ensure_ogurl(content: str, url: str) -> str:
+    if OGURL_MARKER in content:
+        return content
+    tag = f'{OGURL_MARKER}\n<meta property="og:url" content="{url}"/>'
+    return HEAD_CLOSE_RE.sub(f"  {tag}\n</head>", content, count=1)
+
+
+def ensure_schema(content: str, schemas: list[dict]) -> str:
+    if SCHEMA_MARKER in content:
+        return content
+    if not schemas:
+        return content
+    blocks = "\n".join(
+        f'<script type="application/ld+json">{json.dumps(s, separators=(",", ":"))}</script>'
+        for s in schemas
+    )
+    tag = f"{SCHEMA_MARKER}\n{blocks}"
+    return HEAD_CLOSE_RE.sub(f"  {tag}\n</head>", content, count=1)
+
+
+def find_schema_for_page(rel_path: str) -> list[dict]:
+    """
+    PROJECT-SPECIFIC: return the list of JSON-LD schemas to inject on this page.
+    Customize this function per project.
+    """
+    if rel_path == "index.html":
+        return [ORGANIZATION_SCHEMA, WEBSITE_SCHEMA]
+    # Add per-pattern rules here:
+    # if rel_path.startswith("products/"):
+    #     return [build_product_schema(rel_path)]
+    # if rel_path.startswith("blog/"):
+    #     return [build_article_schema(rel_path)]
+    return []
+
+
+# ============================================================
+# Driver
+# ============================================================
+
+
+def process_file(p: Path) -> bool:
+    rel = p.relative_to(ROOT).as_posix()
+    try:
+        content = p.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False
+    if rel in NOINDEX_PAGES:
+        return False
+    if page_has_noindex(content):
+        return False
+
+    new = content
+    new = ensure_canonical(new, url_for_page(p))
+    new = ensure_ogurl(new, url_for_page(p))
+    new = ensure_schema(new, find_schema_for_page(rel))
+
+    if new != content:
+        p.write_text(new, encoding="utf-8")
+        return True
+    return False
+
+
+def main() -> int:
+    if BASE_URL == "https://CHANGE-ME.example.com":
+        sys.exit("Edit BASE_URL at the top of this script before running.")
+
+    changed = 0
+    for p in ROOT.rglob("*.html"):
+        rel = p.relative_to(ROOT).as_posix()
+        if rel.startswith((".git/", "node_modules/", "dist/", "backup/")):
+            continue
+        if process_file(p):
+            print(f"updated: {rel}")
+            changed += 1
+    print(f"\n{changed} file(s) updated")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

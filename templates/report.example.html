@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TMPC.org — Website Fix List for Julie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2744;
+    --navy-soft: #1b3a66;
+    --cream: #fbf7ef;
+    --paper: #ffffff;
+    --gold: #c98b2e;
+    --gold-soft: #f5e8d1;
+    --red: #b23a3a;
+    --red-soft: #fbe5e2;
+    --amber: #c78a17;
+    --amber-soft: #fcefd1;
+    --green: #2f6b3f;
+    --green-soft: #e1f0e3;
+    --ink: #1d2433;
+    --muted: #65728a;
+    --rule: #e6dfd1;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); background: var(--paper); font-size: 11pt; line-height: 1.5; }
+  @page { size: Letter; margin: 0; }
+  .page {
+    width: 8.5in;
+    padding: 0.45in 0.65in 0.55in 0.65in;
+    page-break-after: always;
+    position: relative;
+    background: var(--paper);
+  }
+  .page:last-child { page-break-after: auto; }
+  .cover, .closing { min-height: 11in; padding: 0.7in 0.75in; }
+  .fix { page-break-inside: avoid; }
+
+  /* ---------- Typography ---------- */
+  h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 700; color: var(--navy); margin: 0; line-height: 1.15; letter-spacing: -0.01em; }
+  h1 { font-size: 48pt; }
+  h2 { font-size: 24pt; margin-bottom: 0.2em; }
+  h3 { font-size: 16pt; margin-bottom: 0.2em; }
+  h4 { font-size: 12pt; font-weight: 600; }
+  p { margin: 0 0 0.5em 0; }
+  a { color: var(--navy-soft); text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 2px; }
+  .muted { color: var(--muted); font-size: 10pt; }
+  .kicker { font-family: 'Inter', sans-serif; font-size: 9pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    background: linear-gradient(165deg, var(--navy) 0%, var(--navy-soft) 100%);
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover h1 { color: #fff; font-size: 56pt; line-height: 1.05; }
+  .cover .kicker { color: var(--gold); }
+  .cover .subtitle { font-family: 'Fraunces', serif; font-size: 22pt; color: var(--gold-soft); font-weight: 500; margin-top: 0.3em; font-style: italic; }
+  .cover .meta { display: flex; gap: 3em; margin-top: 2em; }
+  .cover .meta div { font-size: 10pt; color: var(--gold-soft); }
+  .cover .meta strong { display: block; color: #fff; font-size: 14pt; font-family: 'Fraunces', serif; margin-top: 0.2em; }
+  .cover-decoration {
+    position: absolute;
+    right: -100px;
+    top: 40%;
+    width: 500px;
+    height: 500px;
+    border: 40px solid var(--gold);
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  .cover-footer { font-size: 9pt; color: var(--gold-soft); border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1em; }
+
+  /* ---------- Section headers ---------- */
+  .section-header { border-bottom: 2px solid var(--navy); padding-bottom: 0.4em; margin-bottom: 1em; }
+  .section-header .kicker { display: block; margin-bottom: 0.25em; }
+
+  /* ---------- Score tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.25in; margin: 0.8em 0 1em 0; }
+  .tile { border: 1px solid var(--rule); border-radius: 10px; padding: 0.8em 1em; background: var(--cream); }
+  .tile .label { font-size: 9pt; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .tile .score { font-family: 'Fraunces', serif; font-size: 36pt; font-weight: 700; line-height: 1; margin-top: 0.1em; }
+  .tile .score small { font-size: 14pt; color: var(--muted); font-weight: 500; }
+  .tile.bad .score { color: var(--red); }
+  .tile.ok .score { color: var(--amber); }
+  .tile.good .score { color: var(--green); }
+
+  /* ---------- Priority badges ---------- */
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 9pt; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+  .pill.p1 { background: var(--red-soft); color: var(--red); }
+  .pill.p2 { background: var(--amber-soft); color: var(--amber); }
+  .pill.p3 { background: var(--green-soft); color: var(--green); }
+  .pill.ghost { background: var(--cream); color: var(--muted); border: 1px solid var(--rule); }
+
+  /* ---------- Fix card ---------- */
+  .fix { margin-top: 0.6em; }
+  .fix-head { display: flex; align-items: flex-start; gap: 0.8em; margin-bottom: 0.5em; }
+  .fix-number { font-family: 'Fraunces', serif; font-size: 40pt; line-height: 1; color: var(--gold); font-weight: 700; flex: 0 0 auto; }
+  .fix-title { flex: 1; }
+  .fix-title h2 { font-size: 20pt; margin-bottom: 0.1em; }
+  .fix-title .tags { display: flex; gap: 0.4em; margin-top: 0.3em; flex-wrap: wrap; }
+
+  .fix-body { display: grid; grid-template-columns: 3.2in 1fr; gap: 0.3in; }
+  .fix-body-full { display: block; }
+  .fix-shot { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--cream); }
+  .fix-shot img { display: block; width: 100%; }
+  .fix-shot .caption { padding: 5px 9px; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--rule); background: #fff; }
+
+  .what, .howto { margin-top: 0.5em; }
+  .what h4, .howto h4, .affected h4 { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.1em; color: var(--navy); margin-bottom: 0.3em; }
+  .howto { background: var(--cream); border-left: 4px solid var(--gold); padding: 0.6em 0.9em; border-radius: 0 8px 8px 0; font-size: 10.5pt; line-height: 1.4; }
+  .howto ol { margin: 0; padding-left: 1.2em; }
+  .howto ol li { margin-bottom: 0.25em; }
+  .howto code { background: #fff; border: 1px solid var(--rule); padding: 1px 4px; border-radius: 4px; font-size: 9.5pt; font-family: 'SF Mono', monospace; }
+
+  .affected { margin-top: 0.5em; }
+  .affected ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 5px; }
+  .affected li a { display: inline-block; background: var(--gold-soft); color: var(--navy); padding: 2px 9px; border-radius: 6px; font-size: 9pt; text-decoration: none; font-weight: 500; }
+
+  .callout { background: var(--gold-soft); border: 1px dashed var(--gold); border-radius: 8px; padding: 0.55em 0.9em; margin-top: 0.5em; font-size: 10pt; line-height: 1.4; }
+  .callout strong { color: var(--navy); }
+
+  /* ---------- TOC ---------- */
+  .toc { border-top: 1px solid var(--rule); }
+  .toc-row { display: grid; grid-template-columns: 0.35in 1fr auto; align-items: center; gap: 0.5em; padding: 0.5em 0; border-bottom: 1px solid var(--rule); }
+  .toc-row .num { font-family: 'Fraunces', serif; font-size: 18pt; color: var(--gold); font-weight: 700; }
+  .toc-row .title { font-size: 12pt; font-weight: 600; color: var(--navy); }
+  .toc-row .title small { display: block; color: var(--muted); font-weight: 400; font-size: 9.5pt; margin-top: 0.1em; }
+
+  /* ---------- Footer ---------- */
+  .pagefoot { margin-top: 1.2em; display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 0.35em; }
+  .pagefoot .brand { font-family: 'Fraunces', serif; font-weight: 700; color: var(--navy); }
+
+  /* ---------- Closing page ---------- */
+  .closing { background: var(--navy); color: var(--cream); display: flex; flex-direction: column; justify-content: center; }
+  .closing h2 { color: #fff; font-size: 36pt; }
+  .closing .kicker { color: var(--gold); }
+  .closing p { font-size: 13pt; }
+  .closing a { color: var(--gold-soft); }
+  .closing-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 1.2em 1.5em; margin-top: 1em; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="page cover">
+  <div class="cover-decoration"></div>
+  <div>
+    <div class="kicker">Website Health Report &nbsp;&middot;&nbsp; TMPC.org</div>
+    <h1>Fix List<br>for <span style="color:var(--gold-soft)">Julie</span></h1>
+    <div class="subtitle">10 specific things to improve on tmpc.org, in plain English.</div>
+    <div class="meta">
+      <div>Prepared<br><strong>April 22, 2026</strong></div>
+      <div>Pages audited<br><strong>57</strong></div>
+      <div>Platform<br><strong>SnapPages &amp; Subsplash</strong></div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    Live dashboard: <a href="https://tmpc-audit-reports.pages.dev/" style="color:var(--gold-soft)">tmpc-audit-reports.pages.dev</a>
+    &nbsp;&middot;&nbsp; Generated by Google Lighthouse
+  </div>
+</section>
+
+<!-- ============ OVERVIEW ============ -->
+<section class="page">
+  <div class="section-header">
+    <div class="kicker">Overview</div>
+    <h2>Where the site stands today</h2>
+  </div>
+
+  <p>Every page on tmpc.org was scored on four things a normal visitor actually cares about: <strong>how fast it loads</strong>, <strong>how easy it is for everyone to use</strong> (including people with vision or mobility challenges), <strong>whether it follows modern web best practices</strong>, and <strong>how well Google can read it</strong>. Scores are out of 100.</p>
+
+  <div class="tiles">
+    <div class="tile bad"><div class="label">Speed</div><div class="score">66<small>/100</small></div></div>
+    <div class="tile bad"><div class="label">Accessibility</div><div class="score">62<small>/100</small></div></div>
+    <div class="tile good"><div class="label">Best Practices</div><div class="score">95<small>/100</small></div></div>
+    <div class="tile good"><div class="label">SEO (Google)</div><div class="score">91<small>/100</small></div></div>
+  </div>
+
+  <h3 style="margin-top:1.2em">The short version</h3>
+  <p>The site is technically well-built (great Best Practices &amp; SEO scores) but it is <strong>slow</strong> and <strong>hard to use for people with disabilities</strong>. Most of this comes from two things: images that are too big, and missing labels on images, links, and form fields.</p>
+
+  <div class="callout">
+    <strong>How to read this PDF.</strong> Each fix is on its own page. They're ordered by importance — start at #1 and go down. Every fix tells you: what's wrong, which pages have it, and step-by-step what to click in SnapPages to fix it. Blue underlined text is clickable.
+  </div>
+
+  <h3 style="margin-top:1.2em">What you'll need</h3>
+  <ul>
+    <li><strong>SnapPages login</strong> — the editor for tmpc.org pages</li>
+    <li><strong>TinyPNG.com</strong> — free image compressor (no account needed)</li>
+    <li><strong>About 3-4 hours total</strong>, spread over a few sessions</li>
+  </ul>
+
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix List</span><span>Page 2</span></div>
+</section>
+
+<!-- ============ TABLE OF CONTENTS ============ -->
+<section class="page">
+  <div class="section-header">
+    <div class="kicker">Contents</div>
+    <h2>The 10 fixes, ranked</h2>
+  </div>
+
+  <div class="toc">
+    <div class="toc-row"><div class="num">1</div><div class="title">Shrink the homepage images <small>Home page loads in 29 seconds — it should be under 3</small></div><span class="pill p1">Critical</span></div>
+    <div class="toc-row"><div class="num">2</div><div class="title">Add alt text to every image <small>Missing on 56 of 57 pages — blocks screen readers and hurts Google</small></div><span class="pill p1">Critical</span></div>
+    <div class="toc-row"><div class="num">3</div><div class="title">Label the social media icon links <small>Facebook / Instagram buttons have no text — 56 pages</small></div><span class="pill p1">Critical</span></div>
+    <div class="toc-row"><div class="num">4</div><div class="title">Give each page its own description <small>Every page shares the same generic text — Google sees 10 copies</small></div><span class="pill p1">Critical</span></div>
+    <div class="toc-row"><div class="num">5</div><div class="title">Fix form field labels <small>23 forms (signups, Connect) have unlabeled fields</small></div><span class="pill p2">Important</span></div>
+    <div class="toc-row"><div class="num">6</div><div class="title">Fix low-contrast text <small>17 pages have text that's too faint to read easily</small></div><span class="pill p2">Important</span></div>
+    <div class="toc-row"><div class="num">7</div><div class="title">Stop the page from jumping as it loads <small>12 pages shift content around — frustrating on mobile</small></div><span class="pill p2">Important</span></div>
+    <div class="toc-row"><div class="num">8</div><div class="title">Fix heading structure <small>6 pages skip heading levels — confuses screen readers</small></div><span class="pill p3">Nice to have</span></div>
+    <div class="toc-row"><div class="num">9</div><div class="title">Shrink the Staff page <small>Staff page is the largest — lots of headshots to compress</small></div><span class="pill p3">Nice to have</span></div>
+    <div class="toc-row"><div class="num">10</div><div class="title">Fix the Linktree image shape <small>One image on /linktree is stretched</small></div><span class="pill p3">Nice to have</span></div>
+  </div>
+
+  <div class="callout" style="margin-top:1.5em">
+    <strong>If you only do three things:</strong> #1 (shrink homepage images), #2 (add alt text), and #4 (unique page descriptions). Those three will move Speed from 66 → 80+, and Google will start ranking individual pages separately instead of treating the site as one big blob.
+  </div>
+
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix List</span><span>Page 3</span></div>
+</section>
+
+<!-- ============ FIX 1 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">1</div>
+      <div class="fix-title">
+        <div class="kicker">Critical · Speed</div>
+        <h2>Shrink the homepage images</h2>
+        <div class="tags"><span class="pill p1">Critical</span><span class="pill ghost">Home page</span><span class="pill ghost">~45 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/home.png" alt="Homepage">
+          <div class="caption">tmpc.org — 29.7s load, 29 MB total weight</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>Also slow on these pages</h4>
+          <ul>
+            <li><a href="https://tmpc.org/">/</a></li>
+            <li><a href="https://tmpc.org/linktree">/linktree</a></li>
+            <li><a href="https://tmpc.org/students">/students</a></li>
+            <li><a href="https://tmpc.org/volunteer">/volunteer</a></li>
+            <li><a href="https://tmpc.org/bulletin">/bulletin</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>The homepage weighs <strong>29 megabytes</strong> — about the size of a movie trailer. On a typical phone connection, visitors wait almost <strong>30 seconds</strong> to see the main image. Google measures this and downranks slow sites. Many visitors won't wait and will leave.</p>
+          <p>The fix is almost entirely one thing: <strong>the big photos on the homepage are saved at print-quality resolution instead of web resolution</strong>. A 5 MB photo looks identical to a 300 KB photo on a screen — but loads 15× faster.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Go to <a href="https://tinypng.com">tinypng.com</a> in a new tab. Leave it open — you'll drag images into it.</li>
+            <li>Log into SnapPages and open the <strong>Home</strong> page in the editor.</li>
+            <li>Click the big hero image at the top. Click <strong>Replace</strong> → <strong>Download original</strong>. Save to Desktop.</li>
+            <li>Drag that file onto TinyPNG. Wait a few seconds. Click <strong>Download</strong> — the new file is 70-90% smaller.</li>
+            <li>Back in SnapPages, click <strong>Replace</strong> → <strong>Upload</strong> → choose the compressed file.</li>
+            <li>Repeat for every photo on the Home page. There are roughly 6-8 big ones.</li>
+            <li>Click <strong>Publish</strong> at the top right.</li>
+          </ol>
+        </div>
+
+        <div class="callout"><strong>Quick check:</strong> After publishing, open <a href="https://pagespeed.web.dev/report?url=https%3A%2F%2Ftmpc.org">pagespeed.web.dev/report?url=tmpc.org</a>. Speed score should jump from 30 to 60+.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #1</span><span>Page 4</span></div>
+</section>
+
+<!-- ============ FIX 2 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">2</div>
+      <div class="fix-title">
+        <div class="kicker">Critical · Accessibility &amp; SEO</div>
+        <h2>Add alt text to every image</h2>
+        <div class="tags"><span class="pill p1">Critical</span><span class="pill ghost">56 of 57 pages</span><span class="pill ghost">~60 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/about.png" alt="About page">
+          <div class="caption">Every page has this problem — example: /about</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>How big is the problem</h4>
+          <p style="font-size:10.5pt"><strong>56 of 57 pages</strong> have at least one image with no alt text. Start with the most-visited pages:</p>
+          <ul>
+            <li><a href="https://tmpc.org/">/</a></li>
+            <li><a href="https://tmpc.org/about">/about</a></li>
+            <li><a href="https://tmpc.org/worship">/worship</a></li>
+            <li><a href="https://tmpc.org/give">/give</a></li>
+            <li><a href="https://tmpc.org/sermons">/sermons</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>Every image on a website needs a short description called <strong>"alt text."</strong> It does two jobs: (1) screen readers for blind or low-vision visitors read it out loud so they know what the image shows, and (2) Google uses it to understand what the page is about.</p>
+          <p>On tmpc.org, most images have <strong>no alt text at all</strong>. A visitor using a screen reader just hears "image" — nothing about whether it's a photo of Sunday worship, the pastor, or the building.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Open any page in the SnapPages editor.</li>
+            <li>Click on an image. A toolbar appears.</li>
+            <li>Click the <strong>Settings</strong> / gear icon on the image.</li>
+            <li>Find the field labeled <strong>Alt text</strong> (sometimes called "Description").</li>
+            <li>Type a short, truthful description — aim for 5-10 words. Example: <em>"Congregation singing during Sunday worship"</em> or <em>"Exterior view of the stone church building."</em></li>
+            <li>Decorative images (dividers, background shapes) can be skipped or given alt text of <code>""</code> (empty).</li>
+            <li>Click <strong>Publish</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="callout"><strong>Tip:</strong> Don't start with "Image of..." — screen readers already announce it's an image. Just say what it shows.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #2</span><span>Page 5</span></div>
+</section>
+
+<!-- ============ FIX 3 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">3</div>
+      <div class="fix-title">
+        <div class="kicker">Critical · Accessibility</div>
+        <h2>Label the social media icon links</h2>
+        <div class="tags"><span class="pill p1">Critical</span><span class="pill ghost">56 pages</span><span class="pill ghost">~15 min · template fix</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/home.png" alt="Homepage footer with social icons">
+          <div class="caption">The footer Facebook / Instagram / YouTube icons</div>
+        </div>
+        <div class="callout" style="margin-top:0.8em">
+          <strong>Heads up — this one may need Bailey or a SnapPages support ticket.</strong> If you can't find an alt text / label field on the footer icons, it's because they're part of the site theme, not a page you can edit.
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>The Facebook, Instagram, and YouTube icons in the footer are <strong>links with no words</strong>. Sighted visitors see the icons and know what they mean. But a screen reader user just hears <em>"link, link, link"</em> — no idea what each one does.</p>
+          <p>This happens on 56 of 57 pages because the footer is the same on every page.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Log into SnapPages. Go to <strong>Site Settings</strong> → <strong>Footer</strong> (or wherever the social icons are configured).</li>
+            <li>Click each social icon.</li>
+            <li>Look for a field called <strong>Title</strong>, <strong>Alt text</strong>, or <strong>Accessibility label</strong>.</li>
+            <li>Fill in: <em>"Facebook"</em>, <em>"Instagram"</em>, <em>"YouTube"</em> — matching what each one links to.</li>
+            <li>If there is no such field anywhere, email <a href="mailto:support@snappages.com">support@snappages.com</a> with this exact ask:<br>
+              <em>"The social media icons in our theme footer are missing accessible labels (aria-label or title). Our accessibility audit is flagging this on every page. How do we add labels?"</em></li>
+            <li>Publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #3</span><span>Page 6</span></div>
+</section>
+
+<!-- ============ FIX 4 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">4</div>
+      <div class="fix-title">
+        <div class="kicker">Critical · SEO</div>
+        <h2>Give each page its own description</h2>
+        <div class="tags"><span class="pill p1">Critical</span><span class="pill ghost">10+ key pages</span><span class="pill ghost">~60 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/inclusivity.png" alt="Inclusivity page">
+          <div class="caption">/inclusivity — same description as homepage</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>Fix these first</h4>
+          <ul>
+            <li><a href="https://tmpc.org/">/</a></li>
+            <li><a href="https://tmpc.org/about">/about</a></li>
+            <li><a href="https://tmpc.org/give">/give</a></li>
+            <li><a href="https://tmpc.org/inclusivity">/inclusivity</a></li>
+            <li><a href="https://tmpc.org/mission">/mission</a></li>
+            <li><a href="https://tmpc.org/addiction-amp-recovery">/addiction-recovery</a></li>
+            <li><a href="https://tmpc.org/lent">/lent</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>Every page on the site currently has the <strong>same</strong> meta description: <em>"Thompson Memorial Presbyterian Church in New Hope, PA — an inclusive, open and affirming church where all are welcome. Sunday worship at 9 &amp; 11 am. Above all, love."</em></p>
+          <p>That's fine for the home page. It's bad everywhere else. When someone Googles <em>"New Hope church giving"</em> and sees our /give page in results, they see that same generic text instead of something like <em>"Support TMPC's mission through one-time or recurring gifts."</em> They're less likely to click.</p>
+          <p>Google also treats duplicate descriptions as a signal that pages aren't distinct — so it often won't show the individual pages at all.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Open a page in SnapPages (start with <strong>Home</strong>, then <strong>About</strong>, <strong>Give</strong>, etc.).</li>
+            <li>Click <strong>Page Settings</strong> (usually a gear icon near the page name at the top).</li>
+            <li>Find <strong>SEO</strong> → <strong>Meta Description</strong>.</li>
+            <li>Write a <strong>unique</strong> 140-160 character description of what that specific page is about. Be concrete.</li>
+            <li>Examples:<br>
+              <strong>About:</strong> <em>"Meet the pastors, learn our Presbyterian roots, and see how TMPC became New Hope's open &amp; affirming church."</em><br>
+              <strong>Give:</strong> <em>"Support TMPC's ministry in New Hope, PA. One-time or recurring gifts — online, text, or in person."</em><br>
+              <strong>Inclusivity:</strong> <em>"TMPC is an open &amp; affirming congregation. Read our full inclusivity statement and what it means in practice."</em></li>
+            <li>Save, then publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #4</span><span>Page 7</span></div>
+</section>
+
+<!-- ============ FIX 5 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">5</div>
+      <div class="fix-title">
+        <div class="kicker">Important · Accessibility</div>
+        <h2>Fix form field labels</h2>
+        <div class="tags"><span class="pill p2">Important</span><span class="pill ghost">23 pages</span><span class="pill ghost">~30 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/connect.png" alt="Connect page form">
+          <div class="caption">/connect — signup form</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>Form pages affected</h4>
+          <ul>
+            <li><a href="https://tmpc.org/connect">/connect</a></li>
+            <li><a href="https://tmpc.org/baptism-signup">/baptism-signup</a></li>
+            <li><a href="https://tmpc.org/bible-reading-group-signup">/bible-reading-group-signup</a></li>
+            <li><a href="https://tmpc.org/volunteer-signup">/volunteer-signup</a></li>
+            <li><a href="https://tmpc.org/community-meal">/community-meal</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>Some form fields — places where visitors type their name, email, etc. — have no programmatic label. Sighted users see the word "Email" next to the box, but that word isn't <em>connected</em> to the box in code. Screen readers can't announce what each field is for, and autofill on phones often fails.</p>
+          <p>Most of these forms are embedded from <strong>Subsplash</strong>, not built in SnapPages directly. That matters for how you fix them.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step</h4>
+          <ol>
+            <li><strong>If it's a Subsplash form</strong> (most signups): log into Subsplash → Forms → open each form → check each field has a <strong>Label</strong> set (not just placeholder text). Save &amp; republish.</li>
+            <li><strong>If it's a native SnapPages form</strong> (the /connect page may be one): open the page, click each form field, look for a <strong>Label</strong> field in the settings panel. Fill it in ("First name", "Email address", etc.).</li>
+            <li>If you're not sure whether it's SnapPages or Subsplash, look at the form visually — Subsplash forms usually look more polished and have a blue submit button.</li>
+            <li>Publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #5</span><span>Page 8</span></div>
+</section>
+
+<!-- ============ FIX 6 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">6</div>
+      <div class="fix-title">
+        <div class="kicker">Important · Accessibility</div>
+        <h2>Fix low-contrast text</h2>
+        <div class="tags"><span class="pill p2">Important</span><span class="pill ghost">17 pages</span><span class="pill ghost">~20 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/give.png" alt="Give page">
+          <div class="caption">/give — faint text on light backgrounds</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>Pages with contrast issues</h4>
+          <ul>
+            <li><a href="https://tmpc.org/">/</a></li>
+            <li><a href="https://tmpc.org/about">/about</a></li>
+            <li><a href="https://tmpc.org/bulletin">/bulletin</a></li>
+            <li><a href="https://tmpc.org/community-meal">/community-meal</a></li>
+            <li><a href="https://tmpc.org/fall-fest">/fall-fest</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>Some text on the site is too light against its background to pass accessibility standards. Common culprits: light gray body text on white, gold/tan text on cream backgrounds, and white captions on bright photos.</p>
+          <p>This isn't a style preference — it fails the <strong>WCAG 2.1 AA</strong> standard that churches (and everyone else) are legally expected to meet. Older members and anyone in bright sunlight on a phone struggle to read it.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Open each page listed on the left.</li>
+            <li>Click any text that looks faint. Look at the color setting (usually in the text toolbar).</li>
+            <li>If the color is a light gray like <code>#999</code>, change it to a darker gray like <code>#555</code> or full black <code>#000</code>.</li>
+            <li>For text sitting on a photo, either (a) use a darker overlay behind the text, or (b) move the text to a solid-color band above/below the photo.</li>
+            <li>Check with this free tool: <a href="https://webaim.org/resources/contrastchecker/">webaim.org/resources/contrastchecker</a> — paste the two colors in, it tells you pass/fail.</li>
+            <li>Publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #6</span><span>Page 9</span></div>
+</section>
+
+<!-- ============ FIX 7 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">7</div>
+      <div class="fix-title">
+        <div class="kicker">Important · Speed &amp; Usability</div>
+        <h2>Stop the page from jumping as it loads</h2>
+        <div class="tags"><span class="pill p2">Important</span><span class="pill ghost">12 pages</span><span class="pill ghost">~15 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/home.png" alt="Homepage">
+          <div class="caption">Home page has the worst layout shift</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>Pages that jump</h4>
+          <ul>
+            <li><a href="https://tmpc.org/">/</a></li>
+            <li><a href="https://tmpc.org/bulletin">/bulletin</a></li>
+            <li><a href="https://tmpc.org/calendar">/calendar</a></li>
+            <li><a href="https://tmpc.org/connect">/connect</a></li>
+            <li><a href="https://tmpc.org/files">/files</a></li>
+            <li><a href="https://tmpc.org/linktree">/linktree</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>You've seen this before: you start reading a page, then an image loads and shoves everything else down so you lose your place — or worse, you accidentally tap the wrong button because it moved. That's called <strong>layout shift</strong>.</p>
+          <p>It happens when images load without the page knowing how big they'll be, so the page reserves no space for them up front. When they arrive, they push everything down.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step</h4>
+          <ol>
+            <li>This one is partly solved by fixing <strong>#1</strong> (smaller images load faster, so less shifting is visible).</li>
+            <li>In SnapPages, for any image block with manual custom code: make sure each <code>&lt;img&gt;</code> has <strong>width</strong> and <strong>height</strong> attributes set.</li>
+            <li>For Subsplash embeds (calendar, bulletin, files): in the embed settings, look for a <strong>"Fixed height"</strong> or <strong>"Min-height"</strong> option and set it. That prevents the embed from growing as it loads.</li>
+            <li>Publish, then reload the page with <kbd>Cmd+Shift+R</kbd> — watch whether things stay put.</li>
+          </ol>
+        </div>
+        <div class="callout"><strong>Reality check:</strong> Some of this lives inside the SnapPages theme code and isn't fixable in the editor. If it doesn't improve after #1, put this on Bailey's list to raise with SnapPages support.</div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #7</span><span>Page 10</span></div>
+</section>
+
+<!-- ============ FIX 8 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">8</div>
+      <div class="fix-title">
+        <div class="kicker">Nice to have · Accessibility</div>
+        <h2>Fix heading structure</h2>
+        <div class="tags"><span class="pill p3">Nice to have</span><span class="pill ghost">6 pages</span><span class="pill ghost">~20 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/mission.png" alt="Mission page">
+          <div class="caption">/building and /connect are typical offenders</div>
+        </div>
+        <div class="affected" style="margin-top:0.8em">
+          <h4>Pages affected</h4>
+          <ul>
+            <li><a href="https://tmpc.org/building">/building</a></li>
+            <li><a href="https://tmpc.org/connect">/connect</a></li>
+            <li><a href="https://tmpc.org/events">/events</a></li>
+            <li><a href="https://tmpc.org/kids">/kids</a></li>
+            <li><a href="https://tmpc.org/lent">/lent</a></li>
+            <li><a href="https://tmpc.org/what-we-believe">/what-we-believe</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>Every page has headings (big text, smaller subheads, etc.) organized in levels: <strong>Heading 1</strong> (the page title), <strong>Heading 2</strong> (major sections), <strong>Heading 3</strong> (subsections), and so on. These aren't just visual — screen readers use them as a table of contents.</p>
+          <p>On these 6 pages, the levels skip around — for example jumping from Heading 1 straight to Heading 3, skipping Heading 2. That confuses both screen readers and Google.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Open one of the pages on the left.</li>
+            <li>Click each heading/title on the page. In the text formatting toolbar, check the current level (<strong>H1, H2, H3…</strong>).</li>
+            <li>Rule: only one H1 per page (the main title). Everything else should be H2 for major sections, H3 for subsections, and so on <strong>in order</strong> — no skipping.</li>
+            <li>If something looks like a heading but is styled bold instead, it should probably be a real heading — change it.</li>
+            <li>Publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #8</span><span>Page 11</span></div>
+</section>
+
+<!-- ============ FIX 9 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">9</div>
+      <div class="fix-title">
+        <div class="kicker">Nice to have · Speed</div>
+        <h2>Shrink the Staff page</h2>
+        <div class="tags"><span class="pill p3">Nice to have</span><span class="pill ghost">/staff</span><span class="pill ghost">~30 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/about.png" alt="Staff-style page">
+          <div class="caption">/staff — the largest page at 52 KB HTML + many headshots</div>
+        </div>
+        <div class="callout" style="margin-top:0.8em"><strong>Link:</strong> <a href="https://tmpc.org/staff">tmpc.org/staff</a></div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>The <strong>Staff</strong> page is the largest page on the site. It's not broken — the Performance score is 61 — but it has the most room to improve because of all the headshot images.</p>
+          <p>Same story as Fix #1: each headshot is probably saved at too high a resolution for what's displayed (small circles).</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step</h4>
+          <ol>
+            <li>Same process as Fix #1 — download each headshot, compress on <a href="https://tinypng.com">tinypng.com</a>, re-upload.</li>
+            <li>Bonus: if the headshots display at roughly 300×300 pixels on screen, resize the originals to 600×600 before uploading (Mac Preview → Tools → Adjust Size). That way even retina screens get sharp images without paying for 4000×4000 originals.</li>
+            <li>Publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #9</span><span>Page 12</span></div>
+</section>
+
+<!-- ============ FIX 10 ============ -->
+<section class="page">
+  <div class="fix">
+    <div class="fix-head">
+      <div class="fix-number">10</div>
+      <div class="fix-title">
+        <div class="kicker">Nice to have · Polish</div>
+        <h2>Fix the Linktree image shape</h2>
+        <div class="tags"><span class="pill p3">Nice to have</span><span class="pill ghost">/linktree</span><span class="pill ghost">~5 min</span></div>
+      </div>
+    </div>
+
+    <div class="fix-body">
+      <div>
+        <div class="fix-shot">
+          <img src="shots/home.png" alt="Linktree">
+          <div class="caption">One image on /linktree is stretched</div>
+        </div>
+        <div class="callout" style="margin-top:0.8em"><strong>Link:</strong> <a href="https://tmpc.org/linktree">tmpc.org/linktree</a></div>
+      </div>
+      <div>
+        <div class="what">
+          <h4>What's wrong</h4>
+          <p>One image on the <strong>/linktree</strong> page is being displayed at a different aspect ratio than the original — it's either squashed or stretched. Visually it looks slightly off; to a designer it screams amateur.</p>
+        </div>
+
+        <div class="howto">
+          <h4>Step-by-step in SnapPages</h4>
+          <ol>
+            <li>Open the <strong>Linktree</strong> page in the editor.</li>
+            <li>Look at each image in the list. Find the one that looks squashed or stretched compared to the others.</li>
+            <li>Click the image. Either (a) re-size it by dragging the corners until it looks natural, or (b) upload a replacement cropped to the right shape.</li>
+            <li>Publish.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pagefoot"><span class="brand">TMPC.org · Fix #10</span><span>Page 13</span></div>
+</section>
+
+<!-- ============ CLOSING ============ -->
+<section class="page closing">
+  <div>
+    <div class="kicker">You're done</div>
+    <h2>How to know it worked</h2>
+    <p style="color:var(--gold-soft);max-width:6in">Every Monday morning at 6am ET, this audit runs automatically. Come back and check the live dashboard — scores will update. You can see your progress over time.</p>
+
+    <div class="closing-card">
+      <div class="kicker" style="color:var(--gold)">Your dashboard</div>
+      <h3 style="color:#fff;margin-top:0.2em">tmpc-audit-reports.pages.dev</h3>
+      <p style="color:var(--gold-soft);font-size:11pt;margin-top:0.3em">Open it after each batch of fixes to see the new scores. The detailed view shows per-page progress.</p>
+      <a href="https://tmpc-audit-reports.pages.dev" style="color:#fff;text-decoration:underline;font-weight:600">Open live dashboard →</a>
+    </div>
+
+    <div class="closing-card">
+      <div class="kicker" style="color:var(--gold)">Stuck on something?</div>
+      <p style="color:var(--gold-soft);font-size:11pt;margin:0.3em 0 0.1em 0">The two fixes most likely to need help: <strong style="color:#fff">#3 (social icon labels)</strong> and <strong style="color:#fff">#7 (layout shift on embeds)</strong> — both may be theme-level. Forward those to Bailey, who can escalate to SnapPages support.</p>
+    </div>
+
+    <div class="closing-card">
+      <div class="kicker" style="color:var(--gold)">Target scores after these fixes</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1em;margin-top:0.4em">
+        <div><div style="font-size:9pt;color:var(--gold-soft)">Speed</div><div style="font-family:'Fraunces',serif;font-size:28pt;color:#fff">85</div></div>
+        <div><div style="font-size:9pt;color:var(--gold-soft)">Accessibility</div><div style="font-family:'Fraunces',serif;font-size:28pt;color:#fff">95</div></div>
+        <div><div style="font-size:9pt;color:var(--gold-soft)">Best Practices</div><div style="font-family:'Fraunces',serif;font-size:28pt;color:#fff">95</div></div>
+        <div><div style="font-size:9pt;color:var(--gold-soft)">SEO</div><div style="font-family:'Fraunces',serif;font-size:28pt;color:#fff">98</div></div>
+      </div>
+    </div>
+
+    <p style="color:var(--gold-soft);margin-top:2em;font-size:10pt">Thank you for making tmpc.org better for every visitor.</p>
+    <p style="color:var(--gold-soft);font-size:9pt;font-style:italic">Prepared April 22, 2026 · tmpc.org audit</p>
+  </div>
+</section>
+
+</body>
+</html>
