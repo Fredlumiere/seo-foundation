@@ -13,7 +13,7 @@ When this playbook is fully executed, the target site will have:
 1. **Google Analytics 4** installed and collecting visitor data
 2. **Google Search Console** connected, with sitemap submitted
 3. **A GitHub repo** named `{project}-audit` that runs a full Lighthouse audit every Monday
-4. **A public Cloudflare Pages dashboard** at `https://{project}-audit-reports.pages.dev` showing the latest audit
+4. **A dashboard** showing the latest audit (Vercel project or Cloudflare Pages — whichever fits the project's existing infra)
 5. **A generated PDF** listing the top 10 fixes in priority order, with step-by-step instructions tailored to the site's CMS
 6. **A stakeholder email** summarizing what was done and what needs human attention
 
@@ -28,7 +28,7 @@ Before starting, collect from the user:
 - [ ] Who owns/edits the site content day-to-day (the content-owner contact)
 - [ ] Which Google account should own GA4 & Search Console
 - [ ] Which GitHub account should host the audit repo
-- [ ] Whether the user already has: a Cloudflare account, GitHub CLI authenticated (`gh auth status`), existing GA4
+- [ ] Whether the user already has: a Cloudflare or Vercel account (whichever will host the audit dashboard), GitHub CLI authenticated (`gh auth status`), existing GA4
 
 Fill out `PROJECT-WORKSHEET.md` (template at the end of this playbook) before Phase 1.
 
@@ -56,7 +56,7 @@ This playbook is opinionated. It assumes a **public-facing marketing site** you 
 - The site is intentionally not optimized for performance/SEO (internal tool, dashboard, app behind auth)
 - The team already has a different audit tool (DataDog Synthetics, SpeedCurve, Calibre)
 
-Lighthouse + Cloudflare Pages is a free, opinionated default. If the team has paid tooling, integrate with that instead.
+Lighthouse + a static dashboard (Vercel or Cloudflare Pages) is a free, opinionated default. If the team has paid tooling, integrate with that instead.
 
 ### Phase 3 — PDF fix list
 
@@ -236,7 +236,16 @@ Guide them, but they click approve.
 
 ## Phase 2 — Automated weekly audit pipeline
 
-**Goal:** Every Monday at 10:00 UTC, a full Lighthouse audit of every page in the sitemap runs automatically and publishes to a public dashboard.
+**Goal:** Every Monday at 10:00 UTC, a full Lighthouse audit of every page in the sitemap runs automatically and publishes to a dashboard.
+
+### 2.0 Choose hosting for the dashboard
+
+The dashboard is just a static site (`./dist` from unlighthouse). Two paths are both supported by this playbook:
+
+- **Vercel** — recommended when the project being audited is already on Vercel. Reuses an existing token, no new vendor, supports Edge Middleware Basic Auth out of the box. Used by `apiant-website-audit`.
+- **Cloudflare Pages** — recommended when the team already uses Cloudflare or wants a `.pages.dev` URL with no Vercel coupling. Free, public by default.
+
+Sections **2.1–2.4** are shared. Then either follow the **Vercel path (2.5v–2.10v)** or the **Cloudflare path (2.5c–2.10c)** depending on the choice above.
 
 ### 2.1 Create the local repo
 
@@ -251,7 +260,7 @@ git init -b main
 {
   "name": "{project}-audit",
   "version": "1.0.0",
-  "description": "Scheduled Lighthouse audit of {site} published via Cloudflare Pages",
+  "description": "Scheduled Lighthouse audit of {site}",
   "private": true,
   "scripts": {
     "audit": "unlighthouse-ci --site https://{site} --build-static --output-path ./dist"
@@ -281,7 +290,160 @@ npm install --package-lock-only
 
 **Gotcha:** GitHub Actions with `cache: 'npm'` will fail with "Dependencies lock file is not found" if `package-lock.json` isn't committed.
 
-### 2.5 GitHub Actions workflow — `.github/workflows/audit.yml`
+---
+
+### Vercel path (2.5v–2.10v)
+
+Use this path when the audited project is already on Vercel, or when you want to keep tokens/vendors minimal.
+
+#### 2.5v `vercel.json`
+
+```json
+{
+  "version": 2,
+  "cleanUrls": true,
+  "framework": null,
+  "buildCommand": "echo skip",
+  "installCommand": "echo skip",
+  "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "no-referrer" },
+        { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    }
+  ]
+}
+```
+
+The audit dashboard is static; `buildCommand` and `installCommand` are no-ops because `./dist` is already produced by `npm run audit` in the workflow.
+
+#### 2.6v Optional Edge Middleware for Basic Auth — `middleware.js`
+
+If the dashboard should not be public, drop a Basic Auth gate on every route. Skip the file entirely for a public dashboard.
+
+```javascript
+export const config = {
+  matcher: ['/((?!_next/|_vercel/|favicon\\.ico).*)'],
+  runtime: 'edge',
+};
+
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+export default function middleware(request) {
+  const expectedUser = process.env.AUDIT_USER || '{project}';
+  const expectedPwd = process.env.AUDIT_PASSWORD;
+  if (!expectedPwd) {
+    return new Response('Audit dashboard misconfigured: AUDIT_PASSWORD not set', { status: 500 });
+  }
+  const auth = request.headers.get('authorization');
+  if (auth) {
+    const [scheme, encoded] = auth.split(' ');
+    if (scheme === 'Basic' && encoded) {
+      try {
+        const decoded = atob(encoded);
+        const [user, pwd] = decoded.split(':');
+        if (timingSafeEqual(user || '', expectedUser) && timingSafeEqual(pwd || '', expectedPwd)) {
+          return;
+        }
+      } catch {}
+    }
+  }
+  return new Response('Authentication required', {
+    status: 401,
+    headers: { 'WWW-Authenticate': `Basic realm="{project} audit"` },
+  });
+}
+```
+
+Set `AUDIT_USER` and `AUDIT_PASSWORD` as Vercel project env vars (Production scope) before the first deploy.
+
+#### 2.7v GitHub Actions workflow — `.github/workflows/audit.yml`
+
+```yaml
+name: Weekly {project} audit
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unlighthouse audit
+        run: npm run audit
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+```
+
+#### 2.8v Vercel token (USER ACTION)
+
+Generate at `vercel.com/account/tokens` → Create Token → scope: full account. Copy once. Add to the repo:
+
+```bash
+gh secret set VERCEL_TOKEN -b "<paste>"
+```
+
+#### 2.9v Create GitHub repo + push + first run
+
+```bash
+gh repo create {user}/{project}-audit --private --source=. --remote=origin
+git add package.json package-lock.json .gitignore .github/workflows/audit.yml vercel.json middleware.js README.md
+git commit -m "initial audit pipeline"
+git push -u origin main
+
+# Trigger first run
+gh workflow run audit.yml
+gh run watch $(gh run list --workflow=audit.yml --limit 1 --json databaseId --jq '.[0].databaseId')
+```
+
+#### 2.10v Verify the deployed dashboard
+
+The Vercel CLI prints the deployment URL during the workflow run. Check the URL with:
+
+```bash
+curl -sI https://{deployment}.vercel.app/ci-result.json
+```
+
+If Basic Auth is enabled, expect 401 without credentials and 200 with them.
+
+---
+
+### Cloudflare Pages path (2.5c–2.10c)
+
+Use this path when not on Vercel, or when a `.pages.dev` URL is preferred.
+
+#### 2.5c GitHub Actions workflow — `.github/workflows/audit.yml`
 
 ```yaml
 name: Weekly {project} audit
@@ -329,7 +491,7 @@ jobs:
 
 **Gotcha:** the "Create project if missing" step with `continue-on-error: true` is critical. On first run the Pages project doesn't exist and `wrangler pages deploy` errors with `Project not found [code 8000007]`. The create step is idempotent enough to run safely on every subsequent execution.
 
-### 2.6 Cloudflare API token (USER ACTION)
+#### 2.6c Cloudflare API token (USER ACTION)
 
 Claude **cannot** fill Cloudflare token creation forms — credential entry is prohibited. The user creates it via `dash.cloudflare.com` → My Profile → API Tokens → Create Token → Custom token.
 
@@ -350,7 +512,7 @@ curl 'https://api.cloudflare.com/client/v4/accounts' -H "Authorization: Bearer $
 
 **Do not** create tokens with the "Edit Cloudflare Workers" template — it grants 20+ permissions (R2, KV, AI Gateway, etc.) the audit doesn't need. Always use the minimal custom scope.
 
-### 2.7 Create GitHub repo + push
+#### 2.7c Create GitHub repo + push
 
 ```bash
 gh repo create {user}/{project}-audit --public --source=. --remote=origin
@@ -359,7 +521,7 @@ git commit -m "initial audit pipeline"
 git push -u origin main
 ```
 
-### 2.8 Add repo secrets
+#### 2.8c Add repo secrets
 
 ```bash
 gh secret set CLOUDFLARE_API_TOKEN -b "cfut_..."
@@ -368,13 +530,11 @@ gh secret set CLOUDFLARE_ACCOUNT_ID -b "..."
 
 (The Cloudflare Account ID is visible in the Cloudflare dashboard URL or right sidebar.)
 
-### 2.9 Trigger first run + monitor
+#### 2.9c Trigger first run + monitor
 
 ```bash
 gh workflow run audit.yml
-# wait for it to start
 gh run list --workflow=audit.yml --limit 1
-# watch live
 gh run watch <run-id>
 ```
 
@@ -386,7 +546,7 @@ If it fails, fetch logs:
 gh run view <run-id> --log-failed
 ```
 
-### 2.10 Verify the deployed dashboard
+#### 2.10c Verify the deployed dashboard
 
 ```bash
 curl -sI https://{project}-audit-reports.pages.dev/ci-result.json
@@ -579,7 +739,9 @@ Before starting Phase 1, fill this out and save it alongside the project as `PRO
 ## Existing infrastructure
 - GA4 already installed: {yes/no — if yes, Measurement ID}
 - Search Console already verified: {yes/no}
-- Cloudflare account: {yes/no — if no, user must create}
+- Audit dashboard hosting: {Vercel | Cloudflare Pages}
+- Vercel account / token: {yes/no — only needed if Vercel path}
+- Cloudflare account: {yes/no — only needed if Cloudflare path}
 - GitHub org/user for audit repo: {github-handle}
 - Existing sitemap path: {/sitemap.xml | /sitemap_index.xml | none}
 - Existing schema markup: {none | partial | full}
